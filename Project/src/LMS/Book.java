@@ -228,6 +228,7 @@ public class Book {
             {
                 holdRequestsOperations.removeHoldRequest();
                 hr.getBorrower().removeHoldRequest(hr);
+                System.out.println("Expired hold request for \"" + title + "\" has been removed.");
             } 
         }
                
