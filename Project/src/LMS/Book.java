@@ -207,7 +207,100 @@ public class Book {
     }
 
     
-   
+        
+    // Issuing a Book
+    public void issueBook(Borrower borrower, Staff staff)
+    {        
+        //First deleting the expired hold requests
+        Date today = new Date();        
+        
+        ArrayList<HoldRequest> hRequests = holdRequestsOperations.holdRequests;
+        
+        for (int i = 0; i < hRequests.size(); i++)
+        {
+            HoldRequest hr = hRequests.get(i);            
+            
+            //Remove that hold request which has expired
+            long days =  ChronoUnit.DAYS.between(today.toInstant(), hr.getRequestDate().toInstant());        
+            days = 0-days;
+            
+            if(days>Library.getInstance().getHoldRequestExpiry())
+            {
+                holdRequestsOperations.removeHoldRequest();
+                hr.getBorrower().removeHoldRequest(hr);
+            } 
+        }
+               
+        if (isIssued)
+        {
+            System.out.println("\nThe book " + title + " is already issued.");
+            System.out.println("Would you like to place the book on hold? (y/n)");
+             
+            Scanner sc = new Scanner(System.in);
+            String choice = sc.next();
+            
+            if (choice.equals("y"))
+            {                
+                makeHoldRequest(borrower);
+            }
+        }
+        
+        else
+        {               
+            if (!holdRequestsOperations.holdRequests.isEmpty())
+            {
+                boolean hasRequest = false;
+                
+                for (int i = 0; i < holdRequestsOperations.holdRequests.size() && !hasRequest;i++)
+                {
+                    if (holdRequestsOperations.holdRequests.get(i).getBorrower() == borrower)
+                        hasRequest = true;
+                        
+                }
+                
+                if (hasRequest)
+                {
+                    //If this particular borrower has the earliest request for this book
+                    if (holdRequestsOperations.holdRequests.get(0).getBorrower() == borrower)
+                        serviceHoldRequest(holdRequestsOperations.holdRequests.get(0));
+
+                    else
+                    {
+                        System.out.println("\nSorry some other users have requested for this book earlier than you. So you have to wait until their hold requests are processed.");
+                        return;
+                    }
+                }
+                else
+                {
+                    System.out.println("\nSome users have already placed this book on request and you haven't, so the book can't be issued to you.");
+                    
+                    System.out.println("Would you like to place the book on hold? (y/n)");
+
+                    Scanner sc = new Scanner(System.in);
+                    String choice = sc.next();
+                    
+                    if (choice.equals("y"))
+                    {
+                        makeHoldRequest(borrower); 
+                    }                    
+                    
+                    return;
+                }               
+            }
+                        
+            //If there are no hold requests for this book, then simply issue the book.            
+            setIssuedStatus(true);
+            
+            Loan iHistory = new Loan(borrower,this,staff,null,new Date(),null,false);
+            
+            Library.getInstance().addLoan(iHistory);
+            borrower.addBorrowedBook(iHistory);
+                                    
+            System.out.println("\nThe book " + title + " is successfully issued to " + borrower.getName() + ".");
+            System.out.println("\nIssued by: " + staff.getName());            
+        }
+    }
+        
         
     // Returning a Book
     public void returnBook(Borrower borrower, Loan l, Staff staff)
