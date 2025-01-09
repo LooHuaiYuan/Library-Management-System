@@ -300,8 +300,6 @@ public class Book {
             System.out.println("\nIssued by: " + staff.getName());            
         }
     }
-        
-        
     // Returning a Book
     public void returnBook(Borrower borrower, Loan l, Staff staff)
     {
@@ -316,5 +314,5 @@ public class Book {
         System.out.println("\nThe book " + l.getBook().getTitle() + " is successfully returned by " + borrower.getName() + ".");
         System.out.println("\nReceived by: " + staff.getName());            
     }
-    
+
 }   // Book Class Closed
